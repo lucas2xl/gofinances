@@ -5,6 +5,7 @@ export const categories = [
   { key: 'car', name: 'Carro', icon: 'crosshair', color: '#E83F5B' },
   { key: 'leisure', name: 'Lazer', icon: 'heart', color: '#26195C' },
   { key: 'studies', name: 'Estudos', icon: 'book', color: '#9C001A' },
+  { key: 'invest', name: 'Investimento', icon: 'dollar-sign', color: '#314551' },
 ];
 
 export interface category {

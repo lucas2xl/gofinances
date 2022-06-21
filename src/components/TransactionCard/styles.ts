@@ -59,3 +59,15 @@ export const Date = styled.Text`
   color: ${({ theme }) => theme.colors.text};
   font-family: ${({ theme }) => theme.fonts.regular};
 `;
+
+export const ContainerSwipeable = styled.TouchableOpacity`
+  background-color: ${({ theme }) => theme.colors.attention};
+
+  width: 30%;
+  margin-bottom: 16px;
+
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  align-items: center;
+  justify-content: center;
+`;

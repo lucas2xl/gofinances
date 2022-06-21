@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert } from 'react-native';
+import React, { useCallback, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Dimensions, ScrollView } from 'react-native';
 import { useTheme } from 'styled-components';
 import { HighlighCard, TransactionCard } from '../../components';
 import { ITransactionCardProps } from '../../components/TransactionCard';
@@ -27,7 +27,7 @@ import {
 } from './styles';
 
 export interface IDataListProps extends ITransactionCardProps {
-  id: string;
+  id: number;
 }
 
 interface IHighlighProps {
@@ -41,12 +41,16 @@ interface IHighlighData {
   total: IHighlighProps;
 }
 
+const WIDTH = Dimensions.get('window').width;
+
 export const Dashboard = () => {
   const { user, signOut, isLoading: isUserLoading } = useAuth();
   const { colors } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [transactions, setTransaction] = useState<IDataListProps[]>([]);
   const [highlighData, setHighlighData] = useState<IHighlighData | undefined>();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [pos, setPos] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -54,8 +58,6 @@ export const Dashboard = () => {
     }, [])
   );
 
-  console.log(transactions);
-  console.log(user.id);
   const getLastTransactionDate = (
     transactions: IDataListProps[],
     type: 'up' | 'down'
@@ -93,7 +95,15 @@ export const Dashboard = () => {
           };
         }
       );
-      setTransaction(transactions);
+      setTransaction(
+        transactions.sort((a, b) =>
+          new Date(a.date).getTime() < new Date(b.date).getTime()
+            ? 1
+            : new Date(b.date).getTime() < new Date(a.date).getTime()
+            ? -1
+            : 0
+        )
+      );
 
       const lastTransactionsEntries = getLastTransactionDate(
         transactions,
@@ -118,6 +128,9 @@ export const Dashboard = () => {
           lastTransaction: new Date(),
         },
       });
+    } else {
+      setTransaction([]);
+      setHighlighData(undefined);
     }
     setIsLoading(false);
   };
@@ -127,6 +140,15 @@ export const Dashboard = () => {
       await signOut();
     } catch (error) {
       Alert.alert('Não foi possivel sair da conta');
+    }
+  };
+
+  const handleRemove = async (item: IDataListProps) => {
+    try {
+      await storage.transaction.remove(user.id, item.id);
+      await getTransactions();
+    } catch (error) {
+      Alert.alert('Error!', `${error}`);
     }
   };
 
@@ -191,9 +213,13 @@ export const Dashboard = () => {
 
             <TransactionList
               data={transactions}
-              inverted
               keyExtractor={(item) => String(item.id)}
-              renderItem={({ item }) => <TransactionCard data={item} />}
+              renderItem={({ item }) => (
+                <TransactionCard
+                  onPressRemove={() => handleRemove(item)}
+                  data={item}
+                />
+              )}
             />
           </Transactions>
         </>

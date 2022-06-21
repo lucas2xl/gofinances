@@ -1,6 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
-import { Alert, Keyboard, Modal, TouchableWithoutFeedback } from 'react-native';
+import {
+  Alert,
+  Keyboard,
+  Modal,
+  TextInput,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import {
@@ -42,6 +48,7 @@ const defaultCategory = {
 export const Register = () => {
   const { user } = useAuth();
   const navigation = useNavigation();
+  const priceRef = useRef<TextInput>(null);
   const {
     control,
     handleSubmit,
@@ -114,9 +121,11 @@ export const Register = () => {
               autoCapitalize="sentences"
               autoCorrect={false}
               error={errors.name && errors.name.message}
+              onSubmitEditing={() => priceRef.current?.focus()}
             />
 
             <InputForm
+              ref={priceRef}
               placeholder="Preço"
               name="amount"
               control={control}
